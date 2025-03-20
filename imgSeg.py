@@ -2,7 +2,6 @@ import math
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-import cv2
 import argparse
 import random
 
@@ -286,16 +285,16 @@ def escala_cinza_segmentada(imagem):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Operações para segmentação de imagens.")
     parser.add_argument(
-        "operation", type=str, choices=["marr", "canny", "otsu", "objects", "freeman", "box", "grey", "q1", "q2"], help="Operação a ser realizada")
+        "operation", type=str, choices=["marr", "canny", "otsu", "objects", "freeman", "box", "grey", "q1", "q2"],
+        help="Operação a ser realizada: Marr-Hildreth (marr), Canny (canny), Otsu (otsu), Contagem de objetos (objects), Cadeia de Freeman (freeman), Box filter (box), Escala de cinza segmentada (grey), Visualização para a questão 1 (q1), Visualização para a questão 2 (q2)")
     parser.add_argument("image", type=str, help="Caminho para a imagem de entrada.")
     parser.add_argument("-o", type=str, help="Caminho para salvar a imagem de saída.", required=False)
-    parser.add_argument("--sigma", type=float, help="Desvio padrão do filtro gaussiano.", required=False)
-    parser.add_argument("--threshold", type=int, help="Limiar para cruzamentos por zero.", required=False)
-    parser.add_argument("--size", type=int, help="Tamanho do kernel.", required=False)
+    parser.add_argument("--sigma", type=float, help="Desvio padrão do filtro gaussiano. Padrão: (ceil(min(IMG) * 0.005)).", required=False)
+    parser.add_argument("--threshold", type=int, help="Limiar utilizado na segmentação (marr e canny). Padrão: (max(IMG) * 0.2).", required=False)
+    parser.add_argument("--size", type=int, help="Tamanho do filtro utilizado (gaussiano ou box). Padrão: (6 * sigma) + 1.", required=False)
 
     args = parser.parse_args() 
     label = "Resultado"
-    binary = True
 ###############################################################
 
     imagem_exemplo, min, max = ler_imagem_cinza(args.image)
@@ -381,12 +380,10 @@ if __name__ == "__main__":
         resultado3 = aplicar_filtro(imagem_exemplo, kernel)
         kernel = box_filter(tamanho+5)
         resultado = aplicar_filtro(imagem_exemplo, kernel)
-        binary = False
 
     if args.operation == "grey":
         resultado = escala_cinza_segmentada(imagem_exemplo)
         label = "Escala de cinza segmentada"
-        binary = False
 
 ####################### output
 
@@ -458,5 +455,5 @@ if __name__ == "__main__":
         plt.show()
 
     if 'resultado' in locals() and args.o:
-        cv2.imwrite(args.o, resultado*255 if binary else resultado)
+        plt.imsave(args.o, resultado, cmap='gray')
 
